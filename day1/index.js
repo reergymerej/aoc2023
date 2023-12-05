@@ -54,7 +54,6 @@ const getLineInt = (value) => parseInt(getFirstAndLastDigits(value))
 
 assert(getLeftDigit('asdfsixtwo1nine') === '6')
 assert(getRightDigit('asdftwo1nine') === '9')
-
 assert.equal(getFirstAndLastDigits('two1nine'), '29')
 assert(getFirstAndLastDigits('asdf2asdfasdf3asdfasdf7asdf7') === '27')
 assert(getFirstAndLastDigits('treb7uchet') === '77')
