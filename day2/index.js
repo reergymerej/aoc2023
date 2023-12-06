@@ -160,26 +160,74 @@ assert.deepEqual(parseLine(line), {
 // --------------------------------------------------------------------------------
 const input = fs.readFileSync('./input', 'utf-8')
 const lines = input.split('\n').filter(x => x !== '')
-const results = {
-  possible: [],
-  impossible: [],
-}
-const UBOUND = {
-  [R]: 12,
-  [G]: 13,
-  [B]: 14,
+const games = lines.map(line => parseLine(line))
+
+const getSumOfPossible = () => {
+  const results = {
+    possible: [],
+    impossible: [],
+  }
+  const UBOUND = {
+    [R]: 12,
+    [G]: 13,
+    [B]: 14,
+  }
+  lines.map(line => {
+    const {id, game} = parseLine(line)
+    if (isGamePossible(game, UBOUND)) {
+      results.possible.push(id)
+    } else {
+      results.impossible.push(id)
+    }
+  })
+
+  const sumOfPossible = results.possible.reduce((acc, value) => {
+    return acc + value
+  }, 0)
+  console.log({sumOfPossible})
 }
 
-lines.map(line => {
-  const {id, game} = parseLine(line)
-  if (isGamePossible(game, UBOUND)) {
-    results.possible.push(id)
-  } else {
-    results.impossible.push(id)
+const getSet = (game) => {
+  const draws = game.game
+  const set = {
+    [R]: 0,
+    [G]: 0,
+    [B]: 0,
   }
+  draws.map((item) => {
+    for (const [k, v] of Object.entries(item)) {
+      set[k] = Math.max(set[k], v)
+    }
+  })
+  return set
+}
+
+const getSets = (games) => {
+  return games.map(game => {
+    return getSet(game)
+  })
+}
+
+const getPowersOfSets = (sets) => {
+  return sets.map((item) => {
+    return item[R] * item[G] * item[B]
+  })
+}
+
+const getSumOfPowersOfSets = (games) => {
+  const sets = getSets(games)
+  const powersOfSets = getPowersOfSets(sets)
+  const sum = powersOfSets.reduce((acc, value) => {
+    return acc + value
+  }, 0)
+  console.log(sum)
+}
+
+game = parseLine('Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green')
+assert.deepEqual(getSet(game), {
+  [R]: 4,
+  [G]: 2,
+  [B]: 6,
 })
 
-const sumOfPossible = results.possible.reduce((acc, value) => {
-  return acc + value
-}, 0)
-console.log({sumOfPossible})
+getSumOfPowersOfSets(games)
