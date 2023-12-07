@@ -1,7 +1,5 @@
-const fs = require('fs')
 const assert = require('assert')
-const input = fs.readFileSync('./input', 'utf-8')
-const lines = input.split('\n').filter(x => x !== '')
+const {lines} = require('../util')
 
 
 const getRangesFromLine = (line) => {
