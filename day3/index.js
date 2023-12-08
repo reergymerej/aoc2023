@@ -394,7 +394,24 @@ const getSumOfGearRatios = (schematic) => {
     return gearPair[0] * gearPair[1]
   })
   const sum = gearRatios.reduce((acc, value) => acc + value, 0)
-  console.log(sum)
+  return sum
 }
 
-getSumOfGearRatios(lines)
+(() => {
+const schematic = `
+467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..
+`.split('\n').filter(x => x).map(x => x.split(''))
+  assert.deepEqual(getSumOfGearRatios(schematic), 467835)
+})()
+
+console.log(lines.length)
+console.log(getSumOfGearRatios(lines))
