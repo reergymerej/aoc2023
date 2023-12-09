@@ -107,5 +107,38 @@ const getFullValueFromIndex = (test, arr, index) => {
     },
     'center invalid',
   )
+})()
 
+const getContiguous = (test, arr, index) => {
+  let left = []
+  let right = []
+  const currentValue = arr[index]
+  if (!test(currentValue)) {
+    left = getLeft(test, arr, index - 1)
+    right = getRight(test, arr, index + 1)
+  }
+  const result = [
+      left,
+      right,
+  ]
+  return result
+}
+
+;(() => {
+  const test = x => x > 0
+  assert.deepEqual(
+    getContiguous(
+      test,
+      // 1,2,3,4,5,6,7,8
+      [0,0,1,1,0,2,2,2,0],
+      //       ^
+      4
+    ),
+    [
+      // left
+      [1,1],
+      // right
+      [2,2,2],
+    ]
+  )
 })()
