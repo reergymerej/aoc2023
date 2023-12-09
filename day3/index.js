@@ -314,6 +314,14 @@ const isPartOfGear = (surroundingNumbers) => {
   return surroundingNumbers.length === 2
 }
 
+const getGearRatio = (surroundingNumbers) => {
+  const [a, b] = surroundingNumbers
+  const left = parseInt(a.join(''))
+  const right = parseInt(b.join(''))
+  console.log({a, b, left, right})
+  return left * right
+}
+
 const main = (input) => {
   const starsInInput = input.join('').replace(/[^\*]/g, '').length
   const starCoords = getCoords(x => x === '*', input)
@@ -334,6 +342,9 @@ const main = (input) => {
       console.log('This is a gear.')
       showSurroundingValues(input, coord)
       console.log('surrounding numbers', surroundingNumbers)
+
+      const gearRatio = getGearRatio(surroundingNumbers)
+      console.log({ gearRatio })
     } else {
       console.log('--------------')
       console.log('This is not a gear.')
