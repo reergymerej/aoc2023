@@ -211,7 +211,6 @@ const getCoords = (test, grid) => {
     ...$.*....
     .664.598..
     `)
-  // console.log(grid)
 
   const test = x => x === '*'
   assert.deepEqual(
@@ -223,3 +222,54 @@ const getCoords = (test, grid) => {
     ]
   )
 })()
+
+const getValue = (grid, coord) => {
+  const line = grid[coord.y] || []
+  return line[coord.x]
+}
+
+const showSurroundingValues = (grid, coord) => {
+  const {x, y} = coord
+  let top = [
+    { x: x + -1, y: y + -1, },
+    { x: x + +0, y: y + -1, },
+    { x: x + +1, y: y + -1, },
+  ]
+  let middle = [
+    { x: x + -1, y: y + -0, },
+    { x: x + +0, y: y + -0, },
+    { x: x + +1, y: y + -0, },
+  ]
+  let bottom = [
+    { x: x + -1, y: y + +1, },
+    { x: x + +0, y: y + +1, },
+    { x: x + +1, y: y + +1, },
+  ]
+  let result = ''
+  top = top.map(coord => getValue(grid, coord) || ' ')
+  middle = middle.map(coord => getValue(grid, coord) || ' ')
+  bottom = bottom.map(coord => getValue(grid, coord) || ' ')
+  console.log('\n', coord, `\nline: ${coord.y + 1}, column: ${coord.x + 1}`)
+  const spacer = ''
+  console.log(top.join(spacer))
+  console.log(middle.join(spacer))
+  console.log(bottom.join(spacer))
+}
+
+const main = (input) => {
+  const starsInInput = input.join('').replace(/[^\*]/g, '').length
+  const starCoords = getCoords(x => x === '*', input)
+  assert.equal(
+    starCoords.length,
+    starsInInput,
+    'We should find all the stars.'
+  )
+
+  // for each star, show the surrounding values
+  starCoords.forEach(coord => {
+    showSurroundingValues(input, coord)
+  })
+
+}
+
+main(lines)
