@@ -117,15 +117,20 @@ const getContiguous = (test, arr, index) => {
     left = getLeft(test, arr, index - 1)
     right = getRight(test, arr, index + 1)
   }
-  const result = [
-      left,
-      right,
-  ]
+  const result = []
+  if (left.length) {
+    result.push(left)
+  }
+  if (right.length) {
+    result.push(right)
+  }
+
   return result
 }
 
 ;(() => {
   const test = x => x > 0
+
   assert.deepEqual(
     getContiguous(
       test,
@@ -139,6 +144,82 @@ const getContiguous = (test, arr, index) => {
       [1,1],
       // right
       [2,2,2],
+    ]
+  )
+
+  assert.deepEqual(
+    getContiguous(
+      test,
+      // 1,2,3,4,5,6,7,8
+      [0,0,1,1,0,],
+      //       ^
+      4
+    ),
+    [
+      [1,1],
+    ]
+  )
+
+  assert.deepEqual(
+    getContiguous(
+      test,
+      // 1,2,3,4
+      [0,0,1,1,0,],
+      // ^
+      1
+    ),
+    [
+      [1,1],
+    ]
+  )
+
+  assert.deepEqual(
+    getContiguous(
+      test,
+      [0,0,0,],
+      // ^
+      1
+    ),
+    []
+  )
+})()
+
+const getCoords = (test, grid) => {
+  const result = [ ]
+  for (let y = 0; y < grid.length; y++) {
+    const row = grid[y]
+    for (let x = 0; x < row.length; x++) {
+      const value = grid[y][x]
+      if (test(value)) {
+        result.push({x, y})
+      }
+    }
+  }
+  return result
+}
+
+;(() => {
+  const grid = createSchematic(`
+    467..114..
+    ...*......
+    ..35..633.
+    ......#...
+    617*......
+    .....+.58.
+    ..592.....
+    ......755.
+    ...$.*....
+    .664.598..
+    `)
+  // console.log(grid)
+
+  const test = x => x === '*'
+  assert.deepEqual(
+    getCoords(test, grid),
+    [
+      { x: 3, y: 1, },
+      { x: 3, y: 4, },
+      { x: 5, y: 8, },
     ]
   )
 })()
