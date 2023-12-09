@@ -26,7 +26,7 @@ assert.deepEqual(createSchematic(`
 
 const getLeft = (test, arr, index) => {
   const result = []
-  for (; index > 0; index--) {
+  for (; index >= 0; index--) {
     const value = arr[index]
     if (test(value)) {
       result.unshift(value)
@@ -318,7 +318,7 @@ const getGearRatio = (surroundingNumbers) => {
   const [a, b] = surroundingNumbers
   const left = parseInt(a.join(''))
   const right = parseInt(b.join(''))
-  console.log({a, b, left, right})
+  // console.log({a, b, left, right})
   return left * right
 }
 
@@ -333,6 +333,7 @@ const main = (input) => {
 
   // for each star, show the surrounding values
   let gearCount = 0
+  let sumOfGearRatios = 0
   starCoords.forEach(coord => {
     // Is this part of a gear?
     const surroundingNumbers = getSurroundingNumbers(input, coord)
@@ -342,9 +343,9 @@ const main = (input) => {
       console.log('This is a gear.')
       showSurroundingValues(input, coord)
       console.log('surrounding numbers', surroundingNumbers)
-
       const gearRatio = getGearRatio(surroundingNumbers)
       console.log({ gearRatio })
+      sumOfGearRatios += gearRatio
     } else {
       console.log('--------------')
       console.log('This is not a gear.')
@@ -353,7 +354,22 @@ const main = (input) => {
     }
   })
   console.log({gearCount, starsInInput})
+  console.log({ sumOfGearRatios })
 
 }
+
+
+const testSchematic = createSchematic(`
+467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..`)
+main(testSchematic)
 
 main(lines)
