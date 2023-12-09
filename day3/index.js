@@ -259,11 +259,11 @@ const showSurroundingValues = (grid, coord) => {
   top = top.map(coord => getValue(grid, coord) || ' ')
   middle = middle.map(coord => getValue(grid, coord) || ' ')
   bottom = bottom.map(coord => getValue(grid, coord) || ' ')
-  console.log('\n', coord, `\nline: ${coord.y + 1}, column: ${coord.x + 1}`)
+  console.log(`\nline: ${coord.y + 1}, column: ${coord.x + 1}`)
   const spacer = ''
-  console.log(top.join(spacer))
-  console.log(middle.join(spacer))
-  console.log(bottom.join(spacer))
+  console.log('\t', top.join(spacer))
+  console.log('\t', middle.join(spacer))
+  console.log('\t', bottom.join(spacer))
 }
 
 ;(() => {
@@ -282,24 +282,36 @@ const showSurroundingValues = (grid, coord) => {
   )
 })()
 
-const isPartOfGear = (grid, coord) => {
-  // This is a gear if it is surrounded by two numbers.
-  const test = x => /\d/.test(x)
+const getSurroundingByTest = test => (grid, coord) => {
   const top = grid[coord.y - 1]
   const topValues = getContiguous(test, top, coord.x)
-  console.log(top[coord.x])
-  console.log({
-    'from index': coord.x,
-    'value': top[coord.x],
-    top,
-    topValues,
-  })
-  const middle = []
-  const bottom = []
-  const surroundingNumbers = []
-  if (surroundingNumbers.length === 2) {
-    return true
-  }
+  const bottom = grid[coord.y + 1]
+  const bottomValues = getContiguous(test, bottom, coord.x)
+  const middle = grid[coord.y]
+  const middleValues = getContiguous(test, middle, coord.x)
+  // console.log({
+  //   'from x': coord.x,
+  //   'top value': top[coord.x],
+  //   top,
+  //   topValues,
+  //   bottom,
+  //   bottomValues,
+  //   'bottom value': bottom[coord.x],
+  //   middle,
+  //   middleValues,
+  //   'middle value': middle[coord.x],
+  // })
+  return [
+    ...topValues,
+    ...middleValues,
+    ...bottomValues,
+  ]
+}
+
+const getSurroundingNumbers = getSurroundingByTest(x => /\d/.test(x))
+
+const isPartOfGear = (surroundingNumbers) => {
+  return surroundingNumbers.length === 2
 }
 
 const main = (input) => {
@@ -312,15 +324,24 @@ const main = (input) => {
   )
 
   // for each star, show the surrounding values
+  let gearCount = 0
   starCoords.forEach(coord => {
-    showSurroundingValues(input, coord)
     // Is this part of a gear?
-    if (isPartOfGear(input, coord)) {
+    const surroundingNumbers = getSurroundingNumbers(input, coord)
+    if (isPartOfGear(surroundingNumbers)) {
+      gearCount++
+      console.log('--------------')
       console.log('This is a gear.')
+      showSurroundingValues(input, coord)
+      console.log('surrounding numbers', surroundingNumbers)
     } else {
+      console.log('--------------')
       console.log('This is not a gear.')
+      showSurroundingValues(input, coord)
+      console.log('surrounding numbers', surroundingNumbers)
     }
   })
+  console.log({gearCount, starsInInput})
 
 }
 
