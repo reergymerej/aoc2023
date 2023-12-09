@@ -1,127 +1,69 @@
 const assert = require('assert')
 const {lines} = require('../util')
 
-const isValid = (x, y, grid) => {
-  return x >= 0 && x < grid[0].length
-    && y >= 0 && y < grid.length
+const createSchematic = (str) => {
+  return str
+    .trim()
+    .split('\n')
+    .map(x => {
+      return x.trim().split('')
+    })
 }
 
-const getValue = (x, y, grid) => {
-  if (isValid(x, y, grid)) {
-    return grid[y][x]
-  }
-  throw new Error('out of range')
-}
+assert.deepEqual(createSchematic(`
+    123
+    ...
+    456
 
-const getLeftMost = (pattern, coords, grid) => {
-  let leftMost
-  let {x, y} = coords
-  for (; isValid(x, y, grid); x--) {
-    try {
-      const value = getValue(x, y, grid)
-      if (pattern.test(value)) {
-        leftMost = {x, y}
-      } else {
-        break
-      }
-    } catch (err) {
-      if (err.message !== 'out of range') {
-        throw err
-      }
+  `), [
+    ['1','2','3'],
+    ['.','.','.',],
+    ['4','5','6'],
+])
+
+const getLeft = (test, arr, index) => {
+  const result = []
+  for (; index > 0; index--) {
+    const value = arr[index]
+    if (test(value)) {
+      result.unshift(value)
     }
   }
-  return leftMost
+  return result
 }
 
-const getRightMost = (pattern, coords, grid) => {
-  let rightMost
-  let {x, y} = coords
-  for (; isValid(x, y, grid); x++) {
-    try {
-      const value = getValue(x, y, grid)
-      if (pattern.test(value)) {
-        rightMost = {x, y}
-      } else {
-        break
-      }
-    } catch (err) {
-      if (err.message !== 'out of range') {
-        throw err
-      }
+const getRight = (test, arr, index) => {
+  const result = []
+  for (; index < arr.length; index++) {
+    const value = arr[index]
+    if (test(value)) {
+      result.push(value)
     }
   }
-  return rightMost
+  return result
 }
 
-const getExtendedRange = (pattern, coords, grid) => {
-  const leftMost = getLeftMost(/\d/, coords, grid)
-  const rightMost = getRightMost(/\d/, coords, grid)
-  const range = []
-  for (let x = leftMost.x, y = leftMost.y; x <= rightMost.x; x++) {
-    range.push(getValue(x, y, grid))
-  }
-  return range
-}
 
-const getRangesFromRow = (x, y, grid) => {
-  const surrounding = []
-  const left = {x: x - 1, y}
-  if (isValid(left.x, left.y, grid) && /\d/.test(getValue(left.x, left.y, grid))) {
-    const leftRange = getExtendedRange(/\d/, left, grid)
-    surrounding.push(leftRange)
-  }
-  const center = { x, y, }
-  if (isValid(center.x, center.y, grid) && !/\d/.test(getValue(center.x, center.y, grid))) {
-    const right = {x: x + 1, y}
-    if (isValid(right.x, right.y, grid) && /\d/.test(getValue(right.x, right.y, grid))) {
-      const rightRange = getExtendedRange(/\d/, right, grid)
-      surrounding.push(rightRange)
-    }
-  }
-  return surrounding
-}
-
-const getSurroundingNumbers = (x, y, grid) => {
-  let surrounding = []
-  const above = { x, y: y - 1, }
-  const topRanges = getRangesFromRow(above.x, above.y, grid)
-  surrounding = [
-    ...surrounding,
-    ...topRanges,
+const getFullValueFromIndex = (test, arr, index) => {
+  const left = getLeft(test, arr, index - 1)
+  const middle = arr[index]
+  const right = getRight(test, arr, index + 1)
+  return [
+    ...left,
+    middle,
+    ...right,
   ]
-
-  const center = { x, y, }
-  const centerRanges = getRangesFromRow(center.x, center.y, grid)
-  surrounding = [
-    ...surrounding,
-    ...centerRanges,
-  ]
-
-  const below = { x, y: y + 1, }
-  const belowRanges = getRangesFromRow(below.x, below.y, grid)
-  surrounding = [
-    ...surrounding,
-    ...belowRanges,
-  ]
-  return surrounding
 }
 
-// look through each line until we find *
-grid = lines
-let sum = 0
-grid.map((line, y) => {
-  const chars = line.split('')
-  chars.map((char, x) => {
-    if (char === '*') {
-      const surroundingNumbers = getSurroundingNumbers(x, y, grid)
-      if (surroundingNumbers.length === 2) {
-        const ints = surroundingNumbers.map((item) => {
-          return parseInt(item.join(''))
-        })
-        const gearRatio = ints[0] * ints[1]
-        sum += gearRatio
-      }
-    }
-  })
-})
-console.log(sum)
+;(() => {
+  //  0 1 2 3 4 5 6
+  // [0,0,1,2,3,0,0]
+  //        ^
+  const arr = [0,0,1,2,3,0,0]
+  const test = x => x > 0
+  const index = 3
+  assert.deepEqual(
+    getFullValueFromIndex(test, arr, index),
+    [1, 2, 3]
+  )
+})()
