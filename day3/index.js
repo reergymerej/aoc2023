@@ -30,6 +30,8 @@ const getLeft = (test, arr, index) => {
     const value = arr[index]
     if (test(value)) {
       result.unshift(value)
+    } else {
+      break
     }
   }
   return result
@@ -41,6 +43,8 @@ const getRight = (test, arr, index) => {
     const value = arr[index]
     if (test(value)) {
       result.push(value)
+    } else {
+      break
     }
   }
   return result
@@ -116,6 +120,12 @@ const getContiguous = (test, arr, index) => {
   if (!test(currentValue)) {
     left = getLeft(test, arr, index - 1)
     right = getRight(test, arr, index + 1)
+  } else {
+    left = [
+      ...getLeft(test, arr, index - 1),
+      currentValue,
+      ...getRight(test, arr, index + 1),
+    ]
   }
   const result = []
   if (left.length) {
@@ -256,6 +266,42 @@ const showSurroundingValues = (grid, coord) => {
   console.log(bottom.join(spacer))
 }
 
+;(() => {
+  const values = {
+    'from index': 122,
+    value: '8',
+    top: '.938...............*..896..125*...........842...........................485...510............801.....................329.983................',
+  }
+  const expected = [
+    ['9', '8', '3'],
+  ]
+  const test = x => /\d/.test(x)
+  assert.deepEqual(
+    getContiguous(test, values.top.split(''), values['from index']),
+    expected,
+  )
+})()
+
+const isPartOfGear = (grid, coord) => {
+  // This is a gear if it is surrounded by two numbers.
+  const test = x => /\d/.test(x)
+  const top = grid[coord.y - 1]
+  const topValues = getContiguous(test, top, coord.x)
+  console.log(top[coord.x])
+  console.log({
+    'from index': coord.x,
+    'value': top[coord.x],
+    top,
+    topValues,
+  })
+  const middle = []
+  const bottom = []
+  const surroundingNumbers = []
+  if (surroundingNumbers.length === 2) {
+    return true
+  }
+}
+
 const main = (input) => {
   const starsInInput = input.join('').replace(/[^\*]/g, '').length
   const starCoords = getCoords(x => x === '*', input)
@@ -268,6 +314,12 @@ const main = (input) => {
   // for each star, show the surrounding values
   starCoords.forEach(coord => {
     showSurroundingValues(input, coord)
+    // Is this part of a gear?
+    if (isPartOfGear(input, coord)) {
+      console.log('This is a gear.')
+    } else {
+      console.log('This is not a gear.')
+    }
   })
 
 }
