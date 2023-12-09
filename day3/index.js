@@ -1,5 +1,8 @@
 const assert = require('assert')
-const {lines} = require('../util')
+const {
+  lines,
+  assertError,
+} = require('../util')
 
 const createSchematic = (str) => {
   return str
@@ -43,11 +46,13 @@ const getRight = (test, arr, index) => {
   return result
 }
 
-
 const getFullValueFromIndex = (test, arr, index) => {
   const left = getLeft(test, arr, index - 1)
   const middle = arr[index]
   const right = getRight(test, arr, index + 1)
+  if (!test(middle)) {
+    throw new Error('center invalid')
+  }
   return [
     ...left,
     middle,
@@ -56,14 +61,51 @@ const getFullValueFromIndex = (test, arr, index) => {
 }
 
 ;(() => {
+  const test = x => x > 0
+  let arr = [0,0,1,2,3,0,0]
+
   //  0 1 2 3 4 5 6
   // [0,0,1,2,3,0,0]
   //        ^
-  const arr = [0,0,1,2,3,0,0]
-  const test = x => x > 0
-  const index = 3
   assert.deepEqual(
-    getFullValueFromIndex(test, arr, index),
+    getFullValueFromIndex(test, arr, 3),
     [1, 2, 3]
   )
+
+  //  0 1 2 3 4 5 6
+  // [0,0,1,2,3,0,0]
+  //      ^
+  assert.deepEqual(
+    getFullValueFromIndex(test, arr, 2),
+    [1, 2, 3]
+  )
+
+  //  0 1 2 3 4 5 6
+  // [0,0,1,2,3,0,0]
+  //          ^
+  assert.deepEqual(
+    getFullValueFromIndex(test, arr, 4),
+    [1, 2, 3]
+  )
+
+  //  0 1 2 3 4
+  // [0,0,1,2,3]
+  //          ^
+  arr = [0,0,1,2,3]
+  assert.deepEqual(
+    getFullValueFromIndex(test, arr, 4),
+    [1, 2, 3]
+  )
+
+  //  0 1 2 3 4
+  // [0,0,1,2,0]
+  //          ^
+  arr = [0,0,1,2,0]
+  assertError(
+    () => {
+      getFullValueFromIndex(test, arr, 4)
+    },
+    'center invalid',
+  )
+
 })()
