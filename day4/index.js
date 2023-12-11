@@ -29,7 +29,7 @@ const lineToCard = (line) => {
   if (match) {
     const [_, id, winningString, selectedString] = match
     return {
-      // id: parseInt(id),
+      id: parseInt(id),
       winning: separateCleanAndParseString(winningString),
       selected: separateCleanAndParseString(selectedString),
     }
@@ -47,6 +47,7 @@ testBulk(
     [
       'Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53',
       {
+        id: 1,
         winning: [41,48,83,86,17,],
         selected: [ 83, 86, 6, 31, 17, 9, 48, 53],
       },
@@ -54,6 +55,7 @@ testBulk(
     [
       'Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19',
       {
+        id: 2,
         winning: [13, 32, 20, 16, 61, ],
         selected: [61, 30, 68, 82, 17, 32, 24, 19],
       },
@@ -120,4 +122,55 @@ assert.equal(
   13,
   Howmanypointsaretheyworthintotal(sampleLines),
 )
-console.log(Howmanypointsaretheyworthintotal(lines))
+// console.log(Howmanypointsaretheyworthintotal(lines))
+
+const addMatched = card => {
+  return {
+    ...card,
+    matched: getMatchedNumbers(card),
+  }
+}
+
+const getCopiedCards = (id, cardMatchesHash, cards) => {
+  const matchCount = cardMatchesHash[id]
+  const copiedCards = []
+  for (let i = 0; i < matchCount && i < cards.length; i++) {
+    const copiedCardId = id + i + 1
+    copiedCards.push(cards[copiedCardId - 1])
+  }
+  return copiedCards
+}
+
+const howmanytotalscratchcardsdoyouendupwith = (lines) => {
+  const cards = getCards(lines)
+  const cardsWithMatches = cards.map(addMatched)
+  const cardMatchesHash = cardsWithMatches.reduce((acc, card) => {
+    const { id } = card
+    return {
+      ...acc,
+      [id]: getMatchedNumbers(card).length,
+    }
+  }, {})
+
+  let cardsToProcess = [
+    ...cardsWithMatches,
+  ]
+
+  let countOfAllCards = cards.length
+
+  while (cardsToProcess.length) {
+    const { id } = cardsToProcess.shift()
+    const copiedCards = getCopiedCards(id, cardMatchesHash, cards)
+    countOfAllCards += copiedCards.length
+    cardsToProcess = [
+      ...cardsToProcess,
+      ...copiedCards,
+    ]
+  }
+  return countOfAllCards
+}
+
+assert.equal(
+  30,
+  howmanytotalscratchcardsdoyouendupwith(sampleLines),
+)
