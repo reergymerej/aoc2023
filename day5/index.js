@@ -1,5 +1,5 @@
 const assert = require('assert')
-const { lines, testBulk } = require('../util')
+const { allLines, testBulk } = require('../util')
 console.clear()
 
 
@@ -166,8 +166,7 @@ const Whatisthelowestlocationnumberthatcorrespondstoanyoftheinitialseednumbers =
     destination: 'location',
     values: initialSeedNumbers,
   })
-  const lowestLocation = locationNumbers.sort()[0]
-  return lowestLocation
+  return Math.min(...locationNumbers)
 }
 
 ;(() => {
@@ -252,3 +251,8 @@ const Whatisthelowestlocationnumberthatcorrespondstoanyoftheinitialseednumbers =
     Whatisthelowestlocationnumberthatcorrespondstoanyoftheinitialseednumbers(sampleData),
   )
 })()
+
+
+console.log(
+  Whatisthelowestlocationnumberthatcorrespondstoanyoftheinitialseednumbers(parseLines(allLines))
+)
