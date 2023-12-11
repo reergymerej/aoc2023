@@ -156,22 +156,32 @@ const getNextNCards = (cards, id, n) => {
   return next
 }
 
+let cacheUsedCount = 0
+
 const cardResolver = (cardWithMatched, allCards) => {
   if (allCards === undefined) {
     throw new Error('forgot cards')
   }
   const {id} = cardWithMatched
-  let countFromMatched = 0
-  // How many did this one match?
-  const matchedCount = cardWithMatched.matched.length
-  const nextCards = getNextNCards(allCards, id, matchedCount)
-  nextCards.map((nextCard) => {
-    countFromMatched += cardResolver(nextCard, allCards)
-  })
-  return countFromMatched + 1
+  if (cardResolverCache[id] === undefined) {
+    let countFromMatched = 0
+    // How many did this one match?
+    const matchedCount = cardWithMatched.matched.length
+    const nextCards = getNextNCards(allCards, id, matchedCount)
+    nextCards.map((nextCard) => {
+      countFromMatched += cardResolver(nextCard, allCards)
+    })
+    cardResolverCache[id] = countFromMatched + 1
+  } else {
+    cacheUsedCount++
+  }
+  return cardResolverCache[id]
 }
 
 const howmanytotalscratchcardsdoyouendupwith = (lines) => {
+  cardResolverCache = {}
+  cacheUsedCount = 0
+
   const cards = getCards(lines)
   const cardsWithMatches = cards.map(addMatched)
   let count = 0
@@ -179,6 +189,7 @@ const howmanytotalscratchcardsdoyouendupwith = (lines) => {
     const countFromCard = cardResolver(card, cardsWithMatches)
     count += countFromCard
   })
+  console.log({cacheUsedCount})
   return count
 }
 
@@ -189,7 +200,7 @@ assert.equal(
 
 
 ;(() => {
-
+  cardResolverCache = {}
   assert.equal(
     1,
     cardResolver(
@@ -203,6 +214,7 @@ assert.equal(
     ),
   )
 
+  cardResolverCache = {}
   assert.equal(
     2,
     cardResolver(
