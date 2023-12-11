@@ -141,36 +141,83 @@ const getCopiedCards = (id, cardMatchesHash, cards) => {
   return copiedCards
 }
 
+let cardResolverCache = {}
+
+const getNextNCards = (cards, id, n) => {
+  const next = []
+  for (let i = 0; i < n; i++) {
+    // id is 1 based
+    const nextCardIndex = id + i
+    const card = cards[nextCardIndex]
+    if (card) {
+      next.push(card)
+    }
+  }
+  return next
+}
+
+const cardResolver = (cardWithMatched, allCards) => {
+  if (allCards === undefined) {
+    throw new Error('forgot cards')
+  }
+  const {id} = cardWithMatched
+  let countFromMatched = 0
+  // How many did this one match?
+  const matchedCount = cardWithMatched.matched.length
+  const nextCards = getNextNCards(allCards, id, matchedCount)
+  nextCards.map((nextCard) => {
+    countFromMatched += cardResolver(nextCard, allCards)
+  })
+  return countFromMatched + 1
+}
+
 const howmanytotalscratchcardsdoyouendupwith = (lines) => {
   const cards = getCards(lines)
   const cardsWithMatches = cards.map(addMatched)
-  const cardMatchesHash = cardsWithMatches.reduce((acc, card) => {
-    const { id } = card
-    return {
-      ...acc,
-      [id]: getMatchedNumbers(card).length,
-    }
-  }, {})
-
-  let cardsToProcess = [
-    ...cardsWithMatches,
-  ]
-
-  let countOfAllCards = cards.length
-
-  while (cardsToProcess.length) {
-    const { id } = cardsToProcess.shift()
-    const copiedCards = getCopiedCards(id, cardMatchesHash, cards)
-    countOfAllCards += copiedCards.length
-    cardsToProcess = [
-      ...cardsToProcess,
-      ...copiedCards,
-    ]
-  }
-  return countOfAllCards
+  let count = 0
+  cardsWithMatches.map((card) => {
+    const countFromCard = cardResolver(card, cardsWithMatches)
+    count += countFromCard
+  })
+  return count
 }
 
 assert.equal(
   30,
   howmanytotalscratchcardsdoyouendupwith(sampleLines),
+)
+
+
+;(() => {
+
+  assert.equal(
+    1,
+    cardResolver(
+      {
+        id: 1,
+        matched: [],
+      },
+      [
+        {id: 1, matched: []},
+      ]
+    ),
+  )
+
+  assert.equal(
+    2,
+    cardResolver(
+      {
+        id: 1,
+        matched: [0],
+      },
+      [
+        {id: 1, matched: [0],},
+        {id: 2, matched: [], },
+      ],
+    ),
+  )
+})()
+
+console.log(
+  howmanytotalscratchcardsdoyouendupwith(lines)
 )
